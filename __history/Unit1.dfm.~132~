@@ -4,8 +4,8 @@ object Form1: TForm1
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = #1042#1088#1077#1084#1103' '#1084#1072#1090#1095#1072
-  ClientHeight = 273
-  ClientWidth = 592
+  ClientHeight = 265
+  ClientWidth = 579
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -1078,28 +1078,28 @@ object Form1: TForm1
     ParentFont = False
   end
   object Label4: TLabel
-    Left = 8
-    Top = 224
+    Left = 15
+    Top = 215
     Width = 291
     Height = 13
     Caption = #1054#1087#1086#1088#1085#1072#1103' '#1090#1086#1095#1082#1072' '#1085#1072#1095#1072#1083#1072' '#1086#1090#1089#1095#1077#1090#1072' '#1080#1075#1088#1086#1074#1086#1075#1086' '#1074#1088#1077#1084#1077#1085#1080' '#1084#1072#1090#1095#1072':'
   end
   object lbTimeStart: TLabel
-    Left = 320
-    Top = 222
-    Width = 111
+    Left = 329
+    Top = 214
+    Width = 4
     Height = 16
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clBlack
     Font.Height = -13
     Font.Name = 'Tahoma'
-    Font.Style = [fsBold]
+    Font.Style = []
     ParentFont = False
   end
   object lbTimeFinish: TLabel
-    Left = 320
-    Top = 244
-    Width = 111
+    Left = 329
+    Top = 236
+    Width = 4
     Height = 16
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clBlack
@@ -1109,23 +1109,23 @@ object Form1: TForm1
     ParentFont = False
   end
   object Label6: TLabel
-    Left = 8
-    Top = 246
+    Left = 15
+    Top = 237
     Width = 177
     Height = 13
     Caption = #1042#1088#1077#1084#1103' '#1086#1082#1086#1085#1095#1072#1085#1080#1103' '#1090#1077#1082#1091#1097#1077#1075#1086' '#1090#1072#1081#1084#1072':'
   end
   object Label5: TLabel
-    Left = 476
-    Top = 224
+    Left = 485
+    Top = 216
     Width = 82
     Height = 13
     Caption = #1058#1077#1082#1091#1097#1077#1077' '#1074#1088#1077#1084#1103':'
   end
   object lbTimeNow: TLabel
-    Left = 474
-    Top = 243
-    Width = 84
+    Left = 502
+    Top = 235
+    Width = 4
     Height = 16
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clRed
@@ -1133,6 +1133,12 @@ object Form1: TForm1
     Font.Name = 'Tahoma'
     Font.Style = [fsBold]
     ParentFont = False
+  end
+  object Shape1: TShape
+    Left = 15
+    Top = 208
+    Width = 551
+    Height = 1
   end
   object btnStartTimer: TButton
     Left = 457
@@ -1394,11 +1400,11 @@ object Form1: TForm1
     OnClick = btSet105Click
   end
   object btExit: TButton
-    Left = 493
-    Top = 169
+    Left = 492
+    Top = 177
     Width = 75
     Height = 25
-    Caption = #1042#1099#1093#1086#1076
+    Caption = #1047#1072#1082#1088#1099#1090#1100
     TabOrder = 9
     OnClick = btExitClick
   end

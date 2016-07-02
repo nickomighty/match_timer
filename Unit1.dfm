@@ -1327,6 +1327,10 @@ object Form1: TForm1
       Hint = #1053#1072#1089#1090#1088#1086#1081#1090#1077' '#1087#1072#1088#1072#1084#1077#1090#1088#1099' '#1080#1089#1087#1086#1083#1100#1079#1091#1077#1084#1086#1075#1086' '#1084#1086#1076#1091#1083#1103' Video Overlay'
       Caption = 'Video Overlay'
       ImageIndex = 1
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Label2: TLabel
         Left = 79
         Top = 25

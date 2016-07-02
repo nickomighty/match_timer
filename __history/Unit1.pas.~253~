@@ -98,26 +98,17 @@ begin
     end
     else TcpClient1.Sendln(string_command);
   finally
-//       if TcpClient1.Connected then begin
-//          TcpClient1.Disconnect;
-//          TcpClient1.Free;
-//       end;
+       if TcpClient1.Connected then begin
+          TcpClient1.Disconnect;
+          TcpClient1.Free;
+       end;
   end;
 end;
 
 //--------------------------------------------------------- btnStartTimerClick
 procedure TForm1.btExitClick(Sender: TObject);
 begin
-    try
-       Timer1.Enabled := False;
-
-       if TcpClient1.Connected then begin
-          TcpClient1.Disconnect;
-          TcpClient1.Free;
-       end;
-    finally
-       Form1.Close;
-    end;
+    Form1.Close;
 end;
 
 procedure TForm1.btnStartTimerClick(Sender: TObject);
@@ -153,7 +144,9 @@ begin
 
     lbTimeFinish.Caption := TimeToStr(tstart + tdiff);
 
+    Timer1.Interval := 1000;
     Timer1.Enabled := True;
+
 end;
 
 //--------------------------------------------------------- btnStopTimerClick
@@ -322,6 +315,7 @@ begin
       TcpClient1.Free;
    end;
   finally
+      TcpClient1.Active := false;
   end;
  }
   TcpClient1.Active := false;

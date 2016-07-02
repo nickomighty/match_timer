@@ -92,14 +92,14 @@ procedure TForm1.SendCommand (string_command: string);
 begin
 //  string_command := GetCommandString;
   try
-    if not(TcpClient1.Connected) then begin
+//    if not(TcpClient1.Connected) then begin
        if TcpClient1.Connect then
           TcpClient1.Sendln(string_command);
-    end
-    else TcpClient1.Sendln(string_command);
+//    end
+//    else TcpClient1.Sendln(string_command);
   finally
 //       if TcpClient1.Connected then begin
-//          TcpClient1.Disconnect;
+          TcpClient1.Disconnect;
 //          TcpClient1.Free;
 //       end;
   end;
@@ -144,7 +144,9 @@ begin
 
     lbTimeFinish.Caption := TimeToStr(tstart + tdiff);
 
+    Timer1.Interval := 1000;
     Timer1.Enabled := True;
+
 end;
 
 //--------------------------------------------------------- btnStopTimerClick
@@ -306,6 +308,7 @@ end;
 //--------------------------------------------------------- FormDestroy
 procedure TForm1.FormDestroy(Sender: TObject);
 begin
+{
   try
    if TcpClient1.Connected then begin
       TcpClient1.Disconnect;
@@ -314,6 +317,8 @@ begin
   finally
       TcpClient1.Active := false;
   end;
+ }
+  TcpClient1.Active := false;
 end;
 
 
