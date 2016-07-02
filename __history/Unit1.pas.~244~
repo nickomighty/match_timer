@@ -1,0 +1,386 @@
+unit Unit1;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, StdCtrls, Sockets, ExtCtrls, ComCtrls, ExtDlgs, Buttons;
+
+type
+  TForm1 = class(TForm)
+    TcpClient1: TTcpClient;
+    Timer1: TTimer;
+    btnStartTimer: TButton;
+    btnStopTimer: TButton;
+    edMin: TEdit;
+    edSec: TEdit;
+    Label3: TLabel;
+    PageControl1: TPageControl;
+    TabSheet1: TTabSheet;
+    TabSheet2: TTabSheet;
+    Label1: TLabel;
+    edScoreboardNumber: TEdit;
+    RadioGroup1: TRadioGroup;
+    rbScoreboardTeam1: TRadioButton;
+    rbScoreboardTeam2: TRadioButton;
+    edVideoOverlayNumber: TEdit;
+    Label2: TLabel;
+    lblCurrentCommand: TLabel;
+    btSet0: TButton;
+    btSet45: TButton;
+    btSet90: TButton;
+    btSet105: TButton;
+    cbShowAdditionalTime: TCheckBox;
+    edFileName: TEdit;
+    btSelectFile: TButton;
+    OpenDialog1: TOpenDialog;
+    cbChangePicture: TCheckBox;
+    Label4: TLabel;
+    lbTimeStart: TLabel;
+    lbTimeFinish: TLabel;
+    Label6: TLabel;
+    Label5: TLabel;
+    lbTimeNow: TLabel;
+    btExit: TButton;
+    Shape1: TShape;
+    procedure btExitClick(Sender: TObject);
+    procedure cbChangePictureClick(Sender: TObject);
+    procedure btSelectFileClick(Sender: TObject);
+    procedure btSet105Click(Sender: TObject);
+    procedure btSet90Click(Sender: TObject);
+    procedure btSet45Click(Sender: TObject);
+    procedure btSet0Click(Sender: TObject);
+    procedure Label3Click(Sender: TObject);
+    procedure edVideoOverlayNumberChange(Sender: TObject);
+    procedure rbScoreboardTeam2Click(Sender: TObject);
+    procedure rbScoreboardTeam1Click(Sender: TObject);
+    procedure PageControl1Change(Sender: TObject);
+    procedure edScoreboardNumberChange(Sender: TObject);
+    procedure rbModuleTypeVideoOverlayClick(Sender: TObject);
+    procedure rbModuleTypeScoreboardClick(Sender: TObject);
+
+    procedure SendCommand (string_command: string);
+
+    procedure btnStartTimerClick(Sender: TObject);
+    procedure btnStopTimerClick(Sender: TObject);
+    procedure Timer1Timer(Sender: TObject);
+
+    procedure FormCreate(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
+
+    procedure ShowCurrentTime(t: integer);
+     function GetCommandString: string;
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  Form1: TForm1;
+  current_time: integer;
+  tstart, tnow, tdiff: TDateTime;
+  module_type, module_number, module_pin, command_string: string;
+
+implementation
+
+{$R *.dfm}
+
+//--------------------------------------------------------- SendCurrentTime
+procedure TForm1.SendCommand (string_command: string);
+//var string_command: string;
+begin
+//  string_command := GetCommandString;
+  try
+    if not(TcpClient1.Connected) then begin
+       if TcpClient1.Connect then
+          TcpClient1.Sendln(string_command);
+    end
+    else TcpClient1.Sendln(string_command);
+  finally
+//       if TcpClient1.Connected then begin
+//          TcpClient1.Disconnect;
+//          TcpClient1.Free;
+//       end;
+  end;
+end;
+
+//--------------------------------------------------------- btnStartTimerClick
+procedure TForm1.btExitClick(Sender: TObject);
+begin
+    Form1.Close;
+end;
+
+procedure TForm1.btnStartTimerClick(Sender: TObject);
+var m, s, cm, cs: integer;
+begin
+    val(edMin.Text, m, cm); if (cm <> 0) then m := 0;
+    val(edSec.Text, s, cs); if (cs <> 0) then s := 0;
+
+    // Проблема: на разных машинах с различной нагрузкой на процессор
+    // 1000 миллисекунд могут длиться разное время, увы.
+    // Для решения проблемы будем использовать системное время
+    // вместо отсчета 1000 мс.
+    // -------
+    // В итоге, общая схема работы секундомера выглядит следующим образом:
+    // 1) забираем текущее системное время при старте отсчета времени;
+    // 2) вычитаем из него заданное время в полях "минуты" и "секунды";
+    // 3) получаем начальное время отсчета;
+    // 4) при работе таймера сверяем текущее системное время с полученным
+    //    началом отсчета и выводим разницу в минутах и секундах.
+
+    tnow   := now();
+    tdiff  := EncodeTime(m div 60, m mod 60, s, 0);
+    tstart := tnow - tdiff; // локальное время начала текущего тайма
+
+    lbTimeStart.Caption := TimeToStr(tstart);
+
+
+         if (m <  45) then tdiff := EncodeTime(0, 45, 0, 0)
+    else if (m <  90) then tdiff := EncodeTime(1, 30, 0, 0)
+    else if (m < 105) then tdiff := EncodeTime(1, 45, 0, 0)
+    else if (m < 120) then tdiff := EncodeTime(2, 0, 0, 0)
+                      else tdiff := EncodeTime(0, 45, 0, 0);
+
+    lbTimeFinish.Caption := TimeToStr(tstart + tdiff);
+
+    Timer1.Enabled := True;
+end;
+
+//--------------------------------------------------------- btnStopTimerClick
+procedure TForm1.btnStopTimerClick(Sender: TObject);
+begin
+    Timer1.Enabled := false;
+end;
+
+procedure TForm1.btSelectFileClick(Sender: TObject);
+begin
+    if (OpenDialog1.Execute) then
+        edFileName.Text := OpenDialog1.FileName;
+end;
+
+procedure TForm1.btSet0Click(Sender: TObject);
+begin
+    edMin.Text := '0';
+    edSec.Text := '00';
+end;
+
+procedure TForm1.btSet105Click(Sender: TObject);
+begin
+    edMin.Text := '105';
+    edSec.Text := '00';
+end;
+
+procedure TForm1.btSet45Click(Sender: TObject);
+begin
+    edMin.Text := '45';
+    edSec.Text := '00';
+end;
+
+procedure TForm1.btSet90Click(Sender: TObject);
+begin
+    edMin.Text := '90';
+    edSec.Text := '00';
+end;
+
+procedure TForm1.cbChangePictureClick(Sender: TObject);
+begin
+    edFileName.Enabled := cbChangePicture.Checked;
+    btSelectFile.Enabled := cbChangePicture.Checked;
+end;
+
+procedure TForm1.edScoreboardNumberChange(Sender: TObject);
+begin
+    module_number := edScoreboardNumber.Text;
+end;
+
+procedure TForm1.edVideoOverlayNumberChange(Sender: TObject);
+begin
+    module_number := edVideoOverlayNumber.Text;
+end;
+
+//--------------------------------------------------------- Timer1Timer
+
+procedure TForm1.Timer1Timer(Sender: TObject);
+var command_string: string;
+    h, m, s, ms: word;
+begin
+  tnow  := now();
+  tdiff := tnow - tstart;
+
+  lbTimeNow.Caption := timetostr(tnow);
+
+  decodetime(tdiff, h, m, s, ms);
+  current_time := h * 3600 + m * 60 + s;
+
+
+  ShowCurrentTime(current_time);
+  SendCommand(GetCommandString);
+
+  Application.ProcessMessages;
+
+
+  if (module_type = 'scoreboard') then
+  begin
+        // ==========================================================
+        // change checked options at the end of current time
+        // ===
+//        lbTimeFinish.Caption := TimeToStr(tstart + tdiff);
+
+        if (timetostr(tnow) = lbTimeFinish.caption) then
+//        if not(pin_changed) then begin
+//              if (
+//                    (current_time >= 2700) or    // 45*60
+//                    (current_time >= 5400) or    // 90*60
+//                    (current_time >= 6300) or    // 105*60
+//                    (current_time >= 7200)       // 120*60
+//                 ) then
+              begin
+//                    pin_changed := true;
+
+                    // ====================================================
+                    // 1. Change pin to show additional time if neccessary
+                    // ===
+                    if cbShowAdditionalTime.Checked then
+                    begin
+                       // change one pin to another
+                       if (module_pin = 'team1') then begin
+                          rbScoreboardTeam1.Checked := false;
+                          rbScoreboardTeam2.Checked := true;
+                          module_pin := 'team2'
+                       end
+                       else begin
+                          rbScoreboardTeam1.Checked := true;
+                          rbScoreboardTeam2.Checked := false;
+                          module_pin := 'team1';
+                       end;
+                       // drop current time to zero
+                       current_time := 0;
+            //           ShowCurrentTime(current_time);
+            //           SendCommand(GetCommandString);
+                    end;
+
+                    // ====================================================
+                    // 2. Change picture if neccessary
+                    // ===
+                    if cbChangePicture.Checked then
+                    begin
+                        // create command string to change picture in format:
+                        // apiwrite scoreboard <m>, file, <filename>
+                        command_string := 'apiwrite scoreboard ' + module_number
+                                           + ',file,' + OpenDialog1.FileName;
+                         SendCommand(command_string);
+                    end;
+              end;
+//        end;
+  end;
+end;
+
+//--------------------------------------------------------- FormCreate
+procedure TForm1.FormCreate(Sender: TObject);
+begin
+    // start tcpclient
+    TcpClient1.RemoteHost := '127.0.0.1';
+    TcpClient1.RemotePort := '9998';
+    TcpClient1.Active := true;
+
+    PageControl1.ActivePage := TabSheet1;
+
+    edScoreboardNumber.Text := '1';
+    rbScoreboardTeam1.Checked := true;
+    rbScoreboardTeam2.Checked := false;
+
+    Application.HintHidePause := 5000;
+
+    module_type := 'scoreboard';
+    module_number := '1';
+    module_pin := 'team1';
+    command_string := '00:00';
+
+    edVideoOverlayNumber.Text := '1';
+
+    current_time := 0;
+    ShowCurrentTime(current_time);
+end;
+
+//--------------------------------------------------------- FormDestroy
+procedure TForm1.FormDestroy(Sender: TObject);
+begin
+{
+  try
+   if TcpClient1.Connected then begin
+      TcpClient1.Disconnect;
+      TcpClient1.Free;
+   end;
+  finally
+  end;
+ }
+  TcpClient1.Active := false;
+end;
+
+
+
+procedure TForm1.PageControl1Change(Sender: TObject);
+begin
+    case PageControl1.ActivePageIndex of
+      // Scoreboard tab selected
+      0: begin
+         module_type := 'scoreboard';
+         module_number := edScoreboardNumber.Text;
+         if (rbScoreboardTeam1.Checked) then
+             module_pin := 'team1'
+         else
+             module_pin := 'team2';
+      end;
+
+      // Video Overlay tab selected
+      1: begin
+         module_type := 'video overlay';
+         module_number := edVideoOverlayNumber.Text;
+         module_pin := 'text';
+      end;
+    end;
+end;
+
+procedure TForm1.rbModuleTypeScoreboardClick(Sender: TObject);
+begin
+    module_type := 'scoreboard';
+end;
+
+procedure TForm1.rbModuleTypeVideoOverlayClick(Sender: TObject);
+begin
+    module_type := 'video overlay';
+end;
+
+procedure TForm1.rbScoreboardTeam1Click(Sender: TObject);
+begin
+    module_pin := 'team1';
+end;
+
+procedure TForm1.rbScoreboardTeam2Click(Sender: TObject);
+begin
+    module_pin := 'team2';
+end;
+
+//--------------------------------------------------------- ShowCurrentTime
+procedure TForm1.ShowCurrentTime(t: integer);
+var s: integer;
+begin
+    edMin.Text := inttostr(t div 60);
+    s := t mod 60;
+    if (s < 10) then edSec.Text := '0' + inttostr(s) else edSec.Text := inttostr(s);
+end;
+
+//--------------------------------------------------------- ShowCurrentTime
+function TForm1.GetCommandString: string;
+begin
+  GetCommandString := 'apiwrite ' + module_type + ' ' + module_number + ','
+                      + module_pin + ',' + edMin.Text + ':' + edSec.Text;
+end;
+
+procedure TForm1.Label3Click(Sender: TObject);
+begin
+    lblCurrentCommand.Caption := GetCommandString;
+end;
+
+end.
